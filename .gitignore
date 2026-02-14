@@ -1,0 +1,68 @@
+# =========================
+# Global
+# =========================
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+
+# =========================
+# Node.js (backend + frontend)
+# =========================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Environment files
+.env
+.env.local
+.env.development
+.env.production
+
+# Build outputs
+dist/
+build/
+coverage/
+
+# Vite
+.vite/
+
+# =========================
+# Python (ml-service)
+# =========================
+ml-service/.venv/
+ml-service/__pycache__/
+ml-service/*.pyc
+ml-service/*.pyo
+ml-service/*.pyd
+ml-service/.pytest_cache/
+
+# Python virtual environments
+venv/
+.env/
+.venv/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# =========================
+# ML Models & Generated Files
+# =========================
+ml-service/model.pkl
+ml-service/scaler.pkl
+ml-service/data.csv
+ml-service/metrics.json
+
+# =========================
+# VSCode
+# =========================
+.vscode/
+.idea/
+
+# =========================
+# OS generated files
+# =========================
+*.swp
+*.swo
