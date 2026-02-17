@@ -48,14 +48,6 @@ venv/
 .ipynb_checkpoints/
 
 # =========================
-# ML Models & Generated Files
-# =========================
-ml-service/model.pkl
-ml-service/scaler.pkl
-ml-service/data.csv
-ml-service/metrics.json
-
-# =========================
 # VSCode
 # =========================
 .vscode/
