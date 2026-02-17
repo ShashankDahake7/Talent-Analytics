@@ -82,15 +82,16 @@ function riskLow(idx) {
   };
 }
 function riskMed(idx) {
+  const tenure = 18 + (idx % 10);
   return {
-    leaveDaysLast12Months: 12 + (idx % 6),
-    overtimeHoursPerMonth: 10 + (idx % 6),
-    lastPromotionDate: null,
-    performanceRating: 3 + (idx % 2) * 0.4,
-    engagementScore: 3 + (idx % 2) * 0.4,
+    leaveDaysLast12Months: 10 + (idx % 5),
+    overtimeHoursPerMonth: 8 + (idx % 5),
+    lastPromotionDate: monthsAgo(tenure), // Never promoted, but treating start date as reference avoids "999" penalty
+    performanceRating: 3.2 + (idx % 2) * 0.3,
+    engagementScore: 3.2 + (idx % 2) * 0.3,
     promotionsCount: 0,
-    salaryPercentile: 45 + (idx % 12),
-    tenureMonths: 16 + (idx % 10),
+    salaryPercentile: 48 + (idx % 12),
+    tenureMonths: tenure,
   };
 }
 function riskHigh(idx) {
@@ -143,14 +144,14 @@ export function getICs() {
       const skills = roleId.startsWith('ENG')
         ? [{ name: 'JavaScript', level: l(3, 5), yearsExperience: 2 + (idx % 4) }, { name: 'React', level: l(2, 4), yearsExperience: 1 + (idx % 3) }, { name: 'Node.js', level: l(2, 4), yearsExperience: 1 + (idx % 3) }]
         : roleId.startsWith('HR')
-        ? [{ name: 'Employee Relations', level: l(3, 5), yearsExperience: 2 + (idx % 4) }, { name: 'Communication', level: 4, yearsExperience: 3 }]
-        : roleId.startsWith('FIN')
-        ? [{ name: 'Excel', level: 4, yearsExperience: 3 }, { name: 'Financial Modeling', level: l(3, 5), yearsExperience: 2 + (idx % 3) }]
-        : roleId.startsWith('OPS')
-        ? [{ name: 'Process Design', level: l(3, 5), yearsExperience: 2 }, { name: 'Excel', level: 3, yearsExperience: 2 }]
-        : roleId.startsWith('MKT')
-        ? [{ name: 'Digital Marketing', level: l(3, 5), yearsExperience: 2 + (idx % 3) }, { name: 'Analytics', level: 3, yearsExperience: 2 }]
-        : [{ name: 'Figma', level: l(3, 5), yearsExperience: 2 + (idx % 3) }, { name: 'UX', level: 3, yearsExperience: 2 }];
+          ? [{ name: 'Employee Relations', level: l(3, 5), yearsExperience: 2 + (idx % 4) }, { name: 'Communication', level: 4, yearsExperience: 3 }]
+          : roleId.startsWith('FIN')
+            ? [{ name: 'Excel', level: 4, yearsExperience: 3 }, { name: 'Financial Modeling', level: l(3, 5), yearsExperience: 2 + (idx % 3) }]
+            : roleId.startsWith('OPS')
+              ? [{ name: 'Process Design', level: l(3, 5), yearsExperience: 2 }, { name: 'Excel', level: 3, yearsExperience: 2 }]
+              : roleId.startsWith('MKT')
+                ? [{ name: 'Digital Marketing', level: l(3, 5), yearsExperience: 2 + (idx % 3) }, { name: 'Analytics', level: 3, yearsExperience: 2 }]
+                : [{ name: 'Figma', level: l(3, 5), yearsExperience: 2 + (idx % 3) }, { name: 'UX', level: 3, yearsExperience: 2 }];
       ics.push({
         employeeId: empId,
         name,

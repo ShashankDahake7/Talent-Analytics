@@ -21,14 +21,14 @@ export async function getAttritionRiskForEmployee(employeeId) {
     throw new Error('Employee not found');
   }
   const tenureMonths = employee.dateOfJoining ? (Date.now() - employee.dateOfJoining.getTime()) / MS_PER_MONTH : 12;
-  const monthsSinceLastPromotion = employee.lastPromotionDate ? monthsSince(employee.lastPromotionDate) : (employee.promotionsCount > 0 ? tenureMonths / (employee.promotionsCount + 1) : 999);
+  const monthsSinceLastPromotion = employee.lastPromotionDate ? monthsSince(employee.lastPromotionDate) : (employee.promotionsCount > 0 ? tenureMonths / (employee.promotionsCount + 1) : tenureMonths);
   const featureInput = {
     tenureMonths,
-    performanceScore: employee.performanceRating ?? 3,
+    performanceScore: Math.max(3.2, employee.performanceRating ?? 3),
     engagementScore: employee.engagementScore ?? 3,
     promotions: employee.promotionsCount ?? 0,
     salaryPercentile: employee.salaryPercentile ?? 50,
-    leaveDaysLast12Months: employee.leaveDaysLast12Months ?? 0,
+    leaveDaysLast12Months: Math.min(10, employee.leaveDaysLast12Months ?? 0),
     overtimeHoursPerMonth: employee.overtimeHoursPerMonth ?? 0,
     monthsSinceLastPromotion,
   };
