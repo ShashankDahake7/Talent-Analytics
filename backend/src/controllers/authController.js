@@ -23,7 +23,7 @@ export const login = async (req, res) => {
                 role: user.role,
                 employeeId: user.employeeId || null,
             },
-            process.env.JWT_SECRET || 'secret',
+            process.env.JWT_SECRET,
             { expiresIn: '8h' }
         );
         res.json({
