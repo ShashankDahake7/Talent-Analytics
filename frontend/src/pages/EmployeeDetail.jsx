@@ -20,7 +20,7 @@ import { api } from '../lib/api';
 export default function EmployeeDetail() {
   const { employeeId } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, isHR, isManager, isEmployee } = useAuth();
   const [employee, setEmployee] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -36,9 +36,6 @@ export default function EmployeeDetail() {
   const [careerError, setCareerError] = useState('');
   const [feedbackError, setFeedbackError] = useState('');
 
-  const isHR = user?.role === 'HR_ADMIN';
-  const isManager = user?.role === 'MANAGER';
-  const isEmployee = user?.role === 'EMPLOYEE';
   const canSeeFull = isHR || isManager;
   const isSelf = isEmployee && user?.employeeId === employeeId;
 
@@ -422,7 +419,7 @@ export default function EmployeeDetail() {
                   className="input flex-1 py-2 text-sm"
                 >
                   <option value="">Select target role</option>
-                  {roles.map((r) => (
+                  {roles.filter((r) => r.roleId !== employee?.roleId).map((r) => (
                     <option key={r.roleId} value={r.roleId}>
                       {r.title} ({r.roleId})
                     </option>

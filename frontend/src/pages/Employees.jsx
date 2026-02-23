@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, ChevronRight } from 'lucide-react';
@@ -6,7 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import { api } from '../lib/api';
 
 export default function Employees() {
-  const { user } = useAuth();
+  const { user, isHR, isManager } = useAuth();
   const [list, setList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -14,8 +14,6 @@ export default function Employees() {
   const [dept, setDept] = useState('');
   const [status, setStatus] = useState('');
 
-  const isHR = user?.role === 'HR_ADMIN';
-  const isManager = user?.role === 'MANAGER';
   const canList = isHR || isManager;
 
   useEffect(() => {
@@ -23,31 +21,39 @@ export default function Employees() {
       setLoading(false);
       return;
     }
-    const params = new URLSearchParams();
-    if (dept) params.set('departmentId', dept);
-    if (status) params.set('status', status);
     api
-      .get(`/employees?${params}`)
+      .get('/employees')
       .then(setList)
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
-  }, [canList, dept, status]);
+  }, [canList]);
 
-  const filtered = list.filter((e) => {
-    if (!q.trim()) return true;
-    const k = q.toLowerCase();
-    return (
-      (e.name || '').toLowerCase().includes(k) ||
-      (e.email || '').toLowerCase().includes(k) ||
-      (e.employeeId || '').toLowerCase().includes(k)
-    );
-  });
+  const departments = useMemo(
+    () => [...new Set(list.map((e) => e.departmentId).filter(Boolean))].sort(),
+    [list]
+  );
+
+  const filtered = useMemo(() => {
+    return list.filter((e) => {
+      if (dept && e.departmentId !== dept) return false;
+      if (status && e.status !== status) return false;
+      if (q.trim()) {
+        const k = q.toLowerCase();
+        if (
+          !(e.name || '').toLowerCase().includes(k) &&
+          !(e.email || '').toLowerCase().includes(k) &&
+          !(e.employeeId || '').toLowerCase().includes(k)
+        ) return false;
+      }
+      return true;
+    });
+  }, [list, dept, status, q]);
 
   if (!canList) {
     return (
       <div className="max-w-2xl">
         <h1 className="font-serif text-3xl text-ink-900">Employees</h1>
-        <p className="text-ink-500 mt-2">You don’t have access to the employee list.</p>
+        <p className="text-ink-500 mt-2">You don't have access to the employee list.</p>
         {user?.employeeId && (
           <Link
             to={`/employees/${user.employeeId}`}
@@ -92,12 +98,9 @@ export default function Employees() {
           className="input w-auto min-w-[140px]"
         >
           <option value="">All departments</option>
-          <option value="ENG">ENG</option>
-          <option value="HR">HR</option>
-          <option value="FIN">FIN</option>
-          <option value="OPS">OPS</option>
-          <option value="MKT">MKT</option>
-          <option value="DSG">DSG</option>
+          {departments.map((d) => (
+            <option key={d} value={d}>{d}</option>
+          ))}
         </select>
         <select
           value={status}
@@ -155,13 +158,12 @@ export default function Employees() {
                   <div className="flex items-center gap-3 shrink-0">
                     {emp.attritionRiskBand && (
                       <span
-                        className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                          emp.attritionRiskBand === 'high'
-                            ? 'bg-amber-100 text-amber-800'
-                            : emp.attritionRiskBand === 'medium'
+                        className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${emp.attritionRiskBand === 'high'
+                          ? 'bg-amber-100 text-amber-800'
+                          : emp.attritionRiskBand === 'medium'
                             ? 'bg-ink-200 text-ink-700'
                             : 'bg-sage-100 text-sage-700'
-                        }`}
+                          }`}
                       >
                         {emp.attritionRiskBand} risk
                       </span>

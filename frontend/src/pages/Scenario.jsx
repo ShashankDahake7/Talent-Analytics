@@ -10,7 +10,7 @@ export default function Scenario() {
   const [loading, setLoading] = useState(true);
   const [running, setRunning] = useState(false);
   const [error, setError] = useState('');
-  const [riskFilter, setRiskFilter] = useState('high'); // Default to 'high'
+  const [riskFilter, setRiskFilter] = useState('high');
 
   useEffect(() => {
     api
@@ -20,7 +20,6 @@ export default function Scenario() {
       .finally(() => setLoading(false));
   }, []);
 
-  // Filter employees by attrition risk band
   const filteredEmployees = useMemo(() => {
     if (!riskFilter || riskFilter === 'all') {
       return employees;
@@ -28,7 +27,6 @@ export default function Scenario() {
     return employees.filter((emp) => emp.attritionRiskBand === riskFilter);
   }, [employees, riskFilter]);
 
-  // When filter changes, deselect employees that don't match the filter
   useEffect(() => {
     const validSelected = selected.filter((id) =>
       filteredEmployees.some((emp) => emp.employeeId === id)
@@ -36,7 +34,6 @@ export default function Scenario() {
     if (validSelected.length !== selected.length) {
       setSelected(validSelected);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [riskFilter, filteredEmployees]);
 
   const toggle = (id) => {
@@ -100,9 +97,8 @@ export default function Scenario() {
           <Users className="w-5 h-5" /> Select employees (assume they leave)
         </h2>
         <p className="text-sm text-ink-500 mb-4">
-          Choose employees to simulate attrition. We’ll summarize impact by department and suggest mitigations.
+          Choose employees to simulate attrition. We'll summarize impact by department and suggest mitigations.
         </p>
-        {/* Attrition Risk Filter */}
         <div className="mb-4 flex items-center gap-3 flex-wrap">
           <div className="flex items-center gap-2 text-sm text-ink-600">
             <Filter className="w-4 h-4" />
@@ -113,17 +109,16 @@ export default function Scenario() {
               <button
                 key={risk}
                 onClick={() => setRiskFilter(risk)}
-                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                  riskFilter === risk
+                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${riskFilter === risk
                     ? risk === 'high'
                       ? 'bg-red-100 text-red-800 border-2 border-red-300'
                       : risk === 'medium'
-                      ? 'bg-amber-100 text-amber-800 border-2 border-amber-300'
-                      : risk === 'low'
-                      ? 'bg-green-100 text-green-800 border-2 border-green-300'
-                      : 'bg-ink-200 text-ink-800 border-2 border-ink-300'
+                        ? 'bg-amber-100 text-amber-800 border-2 border-amber-300'
+                        : risk === 'low'
+                          ? 'bg-green-100 text-green-800 border-2 border-green-300'
+                          : 'bg-ink-200 text-ink-800 border-2 border-ink-300'
                     : 'bg-ink-50 text-ink-600 border-2 border-transparent hover:bg-ink-100'
-                }`}
+                  }`}
               >
                 {risk.charAt(0).toUpperCase() + risk.slice(1)}
               </button>

@@ -15,12 +15,27 @@ export const runAttritionScenario = async (req, res) => {
             byDept[dept].count += 1;
             byDept[dept].names.push(e.name);
         });
+        const MS_PER_MONTH = 1000 * 60 * 60 * 24 * 30;
         const systemPrompt =
-            'You are an HR workforce planning assistant. Explain the business impact of hypothetical attrition in 3-5 sentences, referencing departments and skills.';
+            'You are an HR workforce planning assistant. Analyze the business impact of hypothetical attrition using the full employee data provided. Reference specific skills, performance levels, departments, and risk scores. Suggest concrete mitigation actions in 4-6 sentences.';
 
-        const userInput = `The following employees are assumed to leave:\n${employees
-            .map((e) => `- ${e.name} (dept: ${e.departmentId || 'N/A'}, role: ${e.roleId || 'N/A'})`)
-            .join('\n')}\n\nSummarize the impact for HR and suggest mitigation actions.`;
+        const userInput = `The following employees are assumed to leave:\n${employees.map((e) => {
+            const tenureMonths = e.dateOfJoining
+                ? Math.round((Date.now() - new Date(e.dateOfJoining).getTime()) / MS_PER_MONTH)
+                : null;
+            const skills = Array.isArray(e.skills) && e.skills.length > 0
+                ? e.skills.map((s) => `${s.name} L${s.level}`).join(', ')
+                : 'No skills recorded';
+            return [
+                `- ${e.name}`,
+                `  Department: ${e.departmentId || 'N/A'}, Role: ${e.roleId || 'N/A'}`,
+                `  Performance: ${e.performanceRating ?? 'N/A'}/5, Engagement: ${e.engagementScore ?? 'N/A'}/5`,
+                `  Attrition risk: ${e.attritionRiskBand ?? 'not assessed'} (score: ${e.attritionRiskScore != null ? (e.attritionRiskScore * 100).toFixed(0) + '%' : 'N/A'})`,
+                `  Tenure: ${tenureMonths != null ? tenureMonths + ' months' : 'N/A'}`,
+                `  High potential: ${e.highPotentialFlag ? 'Yes' : 'No'}`,
+                `  Skills: ${skills}`,
+            ].join('\n');
+        }).join('\n\n')}\n\nSummarize the impact for HR and suggest mitigation actions.`;
 
         let explanation = '';
         try {

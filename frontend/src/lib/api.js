@@ -1,7 +1,8 @@
+const STORAGE_KEY = import.meta.env.VITE_AUTH_STORAGE_KEY ?? 'talent_analytics_auth';
 const API_BASE = '/api';
 
 function getAuthHeaders() {
-  const raw = localStorage.getItem('talent_analytics_auth');
+  const raw = localStorage.getItem(STORAGE_KEY);
   if (!raw) return {};
   try {
     const { token } = JSON.parse(raw);
@@ -22,7 +23,7 @@ async function request(path, options = {}) {
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
     if (res.status === 401) {
-      localStorage.removeItem('talent_analytics_auth');
+      localStorage.removeItem(STORAGE_KEY);
       window.location.href = '/login';
     }
     const err = new Error(data.message || res.statusText || 'Request failed');

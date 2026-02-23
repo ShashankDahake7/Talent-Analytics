@@ -6,12 +6,11 @@ import { useAuth } from '../context/AuthContext';
 import { api } from '../lib/api';
 
 export default function Dashboard() {
-  const { user } = useAuth();
+  const { user, isHR } = useAuth();
   const [headcount, setHeadcount] = useState([]);
   const [attrition, setAttrition] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const isHR = user?.role === 'HR_ADMIN';
 
   useEffect(() => {
     if (!isHR) {

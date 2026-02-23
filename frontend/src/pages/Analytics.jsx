@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import {
   BarChart,
@@ -26,20 +26,30 @@ export default function Analytics() {
     Promise.all([
       api.get('/analytics/headcount').catch(() => []),
       api.get('/analytics/attrition-risk').catch(() => []),
-      api.get(`/analytics/attrition-forecast${dept ? `?departmentId=${encodeURIComponent(dept)}` : ''}`).catch(() => ({ history: [], forecast: [] })),
     ])
-      .then(([h, a, f]) => {
+      .then(([h, a]) => {
         setHeadcount(Array.isArray(h) ? h : []);
         setAttrition(Array.isArray(a) ? a : []);
-        setForecast(Array.isArray(f) ? { history: [], forecast: [] } : f);
       })
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
+  }, []);
+
+  useEffect(() => {
+    api
+      .get(`/analytics/attrition-forecast${dept ? `?departmentId=${encodeURIComponent(dept)}` : ''}`)
+      .catch(() => ({ history: [], forecast: [] }))
+      .then((f) => setForecast(Array.isArray(f) ? { history: [], forecast: [] } : f));
   }, [dept]);
+
+  const departments = useMemo(
+    () => headcount.map((x) => x._id).filter(Boolean).sort(),
+    [headcount]
+  );
 
   const headcountData = headcount.map((x) => ({ name: x._id || 'Unknown', count: x.headcount || 0 }));
   const attritionData = attrition
-    .filter((x) => x._id !== null && x._id !== undefined) // Remove unknown/null entries
+    .filter((x) => x._id !== null && x._id !== undefined)
     .map((x) => ({ name: x._id, count: x.count || 0 }));
   const forecastHistory = (forecast.history || []).map((s) => ({
     period: s.date ? new Date(s.date).toLocaleDateString('en-US', { month: 'short', year: '2-digit' }) : '',
@@ -72,19 +82,19 @@ export default function Analytics() {
           <h1 className="font-serif text-3xl text-ink-900">Analytics</h1>
           <p className="text-ink-500 mt-1">Workforce metrics and attrition forecasts</p>
         </div>
-        <select
-          value={dept}
-          onChange={(e) => setDept(e.target.value)}
-          className="input w-auto min-w-[160px]"
-        >
-          <option value="">All departments</option>
-          <option value="ENG">ENG</option>
-          <option value="HR">HR</option>
-          <option value="FIN">FIN</option>
-          <option value="OPS">OPS</option>
-          <option value="MKT">MKT</option>
-          <option value="DSG">DSG</option>
-        </select>
+        <div className="flex items-center gap-2">
+          <label className="text-sm text-ink-500 whitespace-nowrap">Forecast dept:</label>
+          <select
+            value={dept}
+            onChange={(e) => setDept(e.target.value)}
+            className="input w-auto min-w-[160px]"
+          >
+            <option value="">All departments</option>
+            {departments.map((d) => (
+              <option key={d} value={d}>{d}</option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {error && (

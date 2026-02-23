@@ -5,15 +5,13 @@ import { useAuth } from '../context/AuthContext';
 import { api } from '../lib/api';
 
 export default function AIInsights() {
-  const { user } = useAuth();
+  const { isHR } = useAuth();
   const [feedbackText, setFeedbackText] = useState('');
   const [feedbackResult, setFeedbackResult] = useState(null);
   const [feedbackLoading, setFeedbackLoading] = useState(false);
   const [similarQuery, setSimilarQuery] = useState('');
   const [similarResult, setSimilarResult] = useState(null);
   const [similarLoading, setSimilarLoading] = useState(false);
-
-  const isHR = user?.role === 'HR_ADMIN';
 
   const analyzeFeedback = async () => {
     if (!feedbackText.trim()) return;
@@ -157,9 +155,8 @@ export default function AIInsights() {
                         {similarResult.map((s, i) => (
                           <span
                             key={s.id || i}
-                            className={`rounded-lg px-2.5 py-1 text-xs font-medium ${
-                              s.type === 'learning_item' ? 'bg-ink-200 text-ink-800' : 'bg-sage-100 text-sage-800'
-                            }`}
+                            className={`rounded-lg px-2.5 py-1 text-xs font-medium ${s.type === 'learning_item' ? 'bg-ink-200 text-ink-800' : 'bg-sage-100 text-sage-800'
+                              }`}
                             title={typeof s.score === 'number' ? `Similarity: ${s.score.toFixed(3)}` : ''}
                           >
                             {s.label ?? s.key ?? JSON.stringify(s)}

@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useCallback, useEffect } from 'react';
 
-const STORAGE_KEY = 'talent_analytics_auth';
+const STORAGE_KEY = import.meta.env.VITE_AUTH_STORAGE_KEY;
 
 const AuthContext = createContext(null);
 
@@ -8,6 +8,7 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
@@ -26,17 +27,23 @@ export function AuthProvider({ children }) {
       setLoading(false);
     }
   }, []);
+
   const login = useCallback((userData, authToken) => {
     setUser(userData);
     setToken(authToken);
     localStorage.setItem(STORAGE_KEY, JSON.stringify({ user: userData, token: authToken }));
   }, []);
+
   const logout = useCallback(() => {
     setUser(null);
     setToken(null);
     localStorage.removeItem(STORAGE_KEY);
   }, []);
-  const value = { user, token, login, logout, loading, isAuthenticated: !!token };
+
+  const isHR = user?.role === 'HR_ADMIN';
+  const isManager = user?.role === 'MANAGER';
+  const isEmployee = user?.role === 'EMPLOYEE';
+  const value = { user, token, login, logout, loading, isAuthenticated: !!token, isHR, isManager, isEmployee };
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
