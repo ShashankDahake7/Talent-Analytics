@@ -11,10 +11,39 @@ import {
     ensureLearningItemEmbeddings,
     findSimilarSkills,
 } from '../services/skillEmbeddingService.js';
+import Employee from '../models/Employee.js';
+
+/**
+ * Checks that the requesting user is allowed to access data for the given employeeId.
+ * - HR_ADMIN: always allowed.
+ * - MANAGER: only allowed for employees on their own team (employee.managerId === req.user.employeeId).
+ * - EMPLOYEE: only allowed for themselves.
+ * Returns null if access is granted, or a { status, message } object to send as an error.
+ */
+async function assertEmployeeAccess(req, employeeId) {
+    const { role, employeeId: requesterId } = req.user;
+    if (role === 'HR_ADMIN') return null;
+    if (role === 'EMPLOYEE') {
+        return requesterId !== employeeId
+            ? { status: 403, message: 'Forbidden: employees can only access their own data' }
+            : null;
+    }
+    if (role === 'MANAGER') {
+        const employee = await Employee.findOne({ employeeId }, { managerId: 1 }).lean();
+        if (!employee) return { status: 404, message: 'Employee not found' };
+        if (employee.managerId !== requesterId) {
+            return { status: 403, message: 'Forbidden: you can only access data for your own team members' };
+        }
+        return null;
+    }
+    return { status: 403, message: 'Forbidden' };
+}
 
 export const getAttritionRisk = async (req, res) => {
     try {
         const { employeeId } = req.params;
+        const denied = await assertEmployeeAccess(req, employeeId);
+        if (denied) return res.status(denied.status).json({ message: denied.message });
         const result = await getAttritionRiskForEmployee(employeeId);
         res.json(result);
     } catch (err) {
@@ -26,9 +55,8 @@ export const getAttritionRisk = async (req, res) => {
 export const getCareerRecs = async (req, res) => {
     try {
         const { employeeId } = req.params;
-        if (req.user.role === 'EMPLOYEE' && req.user.employeeId !== employeeId) {
-            return res.status(403).json({ message: 'Forbidden' });
-        }
+        const denied = await assertEmployeeAccess(req, employeeId);
+        if (denied) return res.status(denied.status).json({ message: denied.message });
         const result = await getCareerRecommendations(employeeId);
         res.json(result);
     } catch (err) {
@@ -54,6 +82,8 @@ export const analyzeFeedback = async (req, res) => {
 export const summarizeFeedback = async (req, res) => {
     try {
         const { employeeId } = req.params;
+        const denied = await assertEmployeeAccess(req, employeeId);
+        if (denied) return res.status(denied.status).json({ message: denied.message });
         const result = await summarizeTeamFeedback(employeeId);
         res.json(result);
     } catch (err) {
@@ -65,6 +95,8 @@ export const summarizeFeedback = async (req, res) => {
 export const evaluateHiPo = async (req, res) => {
     try {
         const { employeeId } = req.params;
+        const denied = await assertEmployeeAccess(req, employeeId);
+        if (denied) return res.status(denied.status).json({ message: denied.message });
         const result = await evaluateHighPotential(employeeId);
         res.json(result);
     } catch (err) {
