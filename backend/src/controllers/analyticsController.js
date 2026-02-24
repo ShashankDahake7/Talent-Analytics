@@ -55,7 +55,6 @@ export const getAttritionRiskByDept = async (req, res) => {
             { $sort: { _id: 1 } },
         ]);
 
-        // Pivot into { department, low, medium, high }
         const result = agg.map((row) => {
             const entry = { department: row._id || 'Unknown', low: 0, medium: 0, high: 0 };
             row.bands.forEach((b) => { entry[b.band] = b.count; });

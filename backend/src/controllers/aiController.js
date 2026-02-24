@@ -13,13 +13,6 @@ import {
 } from '../services/skillEmbeddingService.js';
 import Employee from '../models/Employee.js';
 
-/**
- * Checks that the requesting user is allowed to access data for the given employeeId.
- * - HR_ADMIN: always allowed.
- * - MANAGER: only allowed for employees on their own team (employee.managerId === req.user.employeeId).
- * - EMPLOYEE: only allowed for themselves.
- * Returns null if access is granted, or a { status, message } object to send as an error.
- */
 async function assertEmployeeAccess(req, employeeId) {
     const { role, employeeId: requesterId } = req.user;
     if (role === 'HR_ADMIN') return null;

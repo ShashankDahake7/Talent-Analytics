@@ -4,8 +4,25 @@ import LearningItem from '../models/LearningItem.js';
 import Feedback from '../models/Feedback.js';
 import Prediction from '../models/Prediction.js';
 import ManagerAssessment from '../models/ManagerAssessment.js';
-import { generateContent } from './geminiClient.js';
+import SkillEmbedding from '../models/SkillEmbedding.js';
+import { generateContent, embedText } from './geminiClient.js';
 import { getAttritionProbabilityForEmployee } from './mlClient.js';
+
+const SKILL_MATCH_THRESHOLD = 0.75;
+
+function cosineSimilarity(a, b) {
+  if (!a || !b || a.length !== b.length || a.length === 0) return 0;
+  let dot = 0;
+  let na = 0;
+  let nb = 0;
+  for (let i = 0; i < a.length; i += 1) {
+    dot += a[i] * b[i];
+    na += a[i] * a[i];
+    nb += b[i] * b[i];
+  }
+  if (!na || !nb) return 0;
+  return dot / (Math.sqrt(na) * Math.sqrt(nb));
+}
 
 const MS_PER_MONTH = 1000 * 60 * 60 * 24 * 30;
 
@@ -182,20 +199,55 @@ export async function getSkillGaps(employeeId, targetRoleId) {
   if (!role) {
     throw new Error('Job role not found');
   }
-  const empSkills = Object.fromEntries(
-    (employee.skills || []).map((s) => [s.name.toLowerCase(), s.level || 0])
+
+  const gaps = await Promise.all(
+    (role.requiredSkills || []).map(async (req) => {
+      const reqEmbedding = await SkillEmbedding.findOne({
+        type: 'role_skill',
+        'meta.roleId': role.roleId,
+        'meta.skillName': req.name,
+      });
+
+      let bestMatch = { level: 0, matchedSkill: null, similarity: 0 };
+
+      if (reqEmbedding) {
+        for (const empSkill of employee.skills || []) {
+          try {
+            const empVector = await embedText(empSkill.name);
+            const sim = cosineSimilarity(empVector, reqEmbedding.vector);
+            if (sim >= SKILL_MATCH_THRESHOLD && sim > bestMatch.similarity) {
+              bestMatch = {
+                level: empSkill.level || 0,
+                matchedSkill: empSkill.name,
+                similarity: parseFloat(sim.toFixed(3)),
+              };
+            }
+          } catch (err) {
+            console.error(`Embedding failed for skill "${empSkill.name}":`, err.message);
+          }
+        }
+      } else {
+        const key = req.name.toLowerCase();
+        const found = (employee.skills || []).find(
+          (s) => s.name.toLowerCase() === key
+        );
+        if (found) {
+          bestMatch = { level: found.level || 0, matchedSkill: found.name, similarity: 1 };
+        }
+      }
+
+      const gap = Math.max(0, (req.minLevel || 0) - bestMatch.level);
+      return {
+        skill: req.name,
+        requiredLevel: req.minLevel,
+        currentLevel: bestMatch.level,
+        matchedSkill: bestMatch.matchedSkill,
+        similarity: bestMatch.similarity || null,
+        gap,
+      };
+    })
   );
-  const gaps = role.requiredSkills.map((req) => {
-    const key = req.name.toLowerCase();
-    const current = empSkills[key] ?? 0;
-    const gap = Math.max(0, (req.minLevel || 0) - current);
-    return {
-      skill: req.name,
-      requiredLevel: req.minLevel,
-      currentLevel: current,
-      gap,
-    };
-  });
+
   return {
     employeeId,
     targetRoleId: role.roleId,

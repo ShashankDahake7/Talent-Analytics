@@ -76,9 +76,6 @@ export default function Login() {
           <button type="submit" disabled={loading} className="btn-primary w-full py-3">
             {loading ? 'Signing in…' : 'Sign in'}
           </button>
-          <p className="text-center text-sm text-ink-500">
-            Demo: hr@example.com (HR) · priya.sharma@company.com (Manager) · e001@company.com (Employee) — password Admin@123
-          </p>
         </form>
       </motion.div>
     </div>

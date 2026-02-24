@@ -30,11 +30,13 @@ export default function Dashboard() {
   const highRisk = attrition.find((x) => x._id === 'high');
   const highCount = highRisk?.count ?? 0;
 
+  const filterName = (email) => email.split('@')[0];
+
   return (
     <div className="max-w-5xl">
       <div className="mb-10">
         <h1 className="font-serif text-3xl text-ink-900">Dashboard</h1>
-        <p className="text-ink-500 mt-1">Welcome back, {user?.email}</p>
+        <p className="text-ink-500 mt-1">Welcome back, {user?.name || filterName(user?.email)}</p>
       </div>
 
       {loading && (
