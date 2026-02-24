@@ -3,16 +3,12 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 import joblib
 import json
-import os
 
-# Define file paths
 DATA_PATH = "data.csv"
 MODEL_PATH = "model.pkl"
 SCALER_PATH = "scaler.pkl"
-METRICS_PATH = "metrics.json"
 
 def train_and_save_model():
     print("Loading data...")
@@ -22,7 +18,6 @@ def train_and_save_model():
         print(f"Error: {DATA_PATH} not found.")
         return
 
-    # specific feature order expected by the API
     feature_cols = [
         "tenure_months",
         "performance_score",
@@ -64,30 +59,11 @@ def train_and_save_model():
     print("Evaluating model...")
     y_pred = model.predict(X_test_scaled)
     
-    accuracy = accuracy_score(y_test, y_pred)
-    precision = precision_score(y_test, y_pred, zero_division=0)
-    recall = recall_score(y_test, y_pred, zero_division=0)
-    f1 = f1_score(y_test, y_pred, zero_division=0)
-
-    metrics = {
-        "accuracy": accuracy,
-        "precision": precision,
-        "recall": recall,
-        "f1_score": f1
-    }
-
-    print("Model Metrics:")
-    for k, v in metrics.items():
-        print(f"  {k}: {v:.4f}")
-
     # Save artifacts
     print("Saving artifacts...")
     joblib.dump(model, MODEL_PATH)
     joblib.dump(scaler, SCALER_PATH)
     
-    with open(METRICS_PATH, "w") as f:
-        json.dump(metrics, f, indent=4)
-
     print("Training complete. Artifacts saved.")
 
 if __name__ == "__main__":

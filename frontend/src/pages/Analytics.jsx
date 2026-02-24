@@ -11,12 +11,14 @@ import {
   Line,
   Legend,
   CartesianGrid,
+  Cell,
 } from 'recharts';
 import { api } from '../lib/api';
 
 export default function Analytics() {
   const [headcount, setHeadcount] = useState([]);
   const [attrition, setAttrition] = useState([]);
+  const [riskByDept, setRiskByDept] = useState([]);
   const [forecast, setForecast] = useState({ history: [], forecast: [] });
   const [dept, setDept] = useState('');
   const [loading, setLoading] = useState(true);
@@ -26,10 +28,12 @@ export default function Analytics() {
     Promise.all([
       api.get('/analytics/headcount').catch(() => []),
       api.get('/analytics/attrition-risk').catch(() => []),
+      api.get('/analytics/attrition-risk-by-dept').catch(() => []),
     ])
-      .then(([h, a]) => {
+      .then(([h, a, r]) => {
         setHeadcount(Array.isArray(h) ? h : []);
         setAttrition(Array.isArray(a) ? a : []);
+        setRiskByDept(Array.isArray(r) ? r : []);
       })
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
@@ -162,8 +166,49 @@ export default function Analytics() {
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
-        className="card p-6"
+        transition={{ delay: 0.35 }}
+        className="card p-6 mt-8"
+      >
+        <h2 className="font-semibold text-ink-900 mb-1">Attrition risk by department</h2>
+        <p className="text-sm text-ink-500 mb-4">Low / Medium / High risk employee counts per department</p>
+        {riskByDept.length === 0 ? (
+          <p className="text-ink-500 text-sm py-12 text-center">No data</p>
+        ) : (
+          <div className="h-80">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={riskByDept} margin={{ top: 8, right: 16, left: 0, bottom: 24 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5e4e2" />
+                <XAxis
+                  dataKey="department"
+                  tick={{ fontSize: 11 }}
+                  stroke="#737066"
+                  angle={-25}
+                  textAnchor="end"
+                  interval={0}
+                />
+                <YAxis tick={{ fontSize: 12 }} stroke="#737066" allowDecimals={false} />
+                <Tooltip
+                  contentStyle={{ borderRadius: 12, border: '1px solid #e5e4e2' }}
+                  formatter={(value, name) => [value, name.charAt(0).toUpperCase() + name.slice(1) + ' risk']}
+                />
+                <Legend
+                  formatter={(value) => value.charAt(0).toUpperCase() + value.slice(1) + ' risk'}
+                  wrapperStyle={{ paddingTop: 8, fontSize: 12 }}
+                />
+                <Bar dataKey="low" stackId="a" fill="#5f7a58" radius={[0, 0, 0, 0]} name="low" />
+                <Bar dataKey="medium" stackId="a" fill="#d97706" radius={[0, 0, 0, 0]} name="medium" />
+                <Bar dataKey="high" stackId="a" fill="#dc2626" radius={[4, 4, 0, 0]} name="high" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        )}
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.4 }}
+        className="card p-6 mt-8"
       >
         <h2 className="font-semibold text-ink-900 mb-4">Attrition forecast</h2>
         {forecastHistory.length === 0 && forecastFuture.length === 0 ? (
