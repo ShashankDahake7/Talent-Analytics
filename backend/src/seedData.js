@@ -98,7 +98,7 @@ function riskHigh(idx) {
   return {
     leaveDaysLast12Months: 20 + (idx % 8),
     overtimeHoursPerMonth: 18 + (idx % 8),
-    lastPromotionDate: null,
+    lastPromotionDate: monthsAgo(24 + (idx % 8)), // 24–31 months ago — long gap, still drives high risk
     performanceRating: 2 + (idx % 2) * 0.4,
     engagementScore: 2 + (idx % 2) * 0.4,
     promotionsCount: 0,
