@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { api } from '../lib/api';
 import {
     ArrowLeft,
     User,
@@ -16,7 +17,7 @@ import {
 export default function ManagerAssessment() {
     const { employeeId } = useParams();
     const navigate = useNavigate();
-    const { token } = useAuth();
+    useAuth(); // ensures user is authenticated
 
     const [assessment, setAssessment] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -25,16 +26,12 @@ export default function ManagerAssessment() {
 
     useEffect(() => {
         fetchAssessment();
-    }, [employeeId, token]);
+    }, [employeeId]);
 
     const fetchAssessment = async () => {
         try {
             setLoading(true);
-            const res = await fetch(`http://localhost:5001/api/managers/${employeeId}/assessment`, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-            if (!res.ok) throw new Error('Failed to fetch assessment');
-            const data = await res.json();
+            const data = await api.get(`/managers/${employeeId}/assessment`);
             setAssessment(data);
         } catch (err) {
             setError(err.message);

@@ -17,11 +17,9 @@ function buildNav(isHR, isEmployee, employeeId) {
 }
 
 export default function Layout() {
-  const { user, logout } = useAuth();
+  const { user, logout, isHR, isEmployee } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const isHR = user?.role === 'HR_ADMIN';
-  const isEmployee = user?.role === 'EMPLOYEE';
   const nav = buildNav(isHR, isEmployee, user?.employeeId);
 
   const handleLogout = () => {

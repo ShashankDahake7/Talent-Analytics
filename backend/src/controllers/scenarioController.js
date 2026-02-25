@@ -1,5 +1,6 @@
 import Employee from '../models/Employee.js';
 import { generateContent } from '../services/geminiClient.js';
+import { MS_PER_MONTH } from '../utils.js';
 
 export const runAttritionScenario = async (req, res) => {
     try {
@@ -15,7 +16,6 @@ export const runAttritionScenario = async (req, res) => {
             byDept[dept].count += 1;
             byDept[dept].names.push(e.name);
         });
-        const MS_PER_MONTH = 1000 * 60 * 60 * 24 * 30;
         const systemPrompt =
             'You are an HR workforce planning assistant. Analyze the business impact of hypothetical attrition using the full employee data provided. Reference specific skills, performance levels, departments, and risk scores. Suggest concrete mitigation actions in 4-6 sentences.';
 

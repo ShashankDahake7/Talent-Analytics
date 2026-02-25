@@ -2,22 +2,7 @@ import JobRole from '../models/JobRole.js';
 import LearningItem from '../models/LearningItem.js';
 import SkillEmbedding from '../models/SkillEmbedding.js';
 import { embedText, generateContent } from './geminiClient.js';
-
-function cosineSimilarity(a, b) {
-  if (!a || !b || a.length !== b.length || a.length === 0) return 0;
-  let dot = 0;
-  let na = 0;
-  let nb = 0;
-  for (let i = 0; i < a.length; i += 1) {
-    const va = a[i];
-    const vb = b[i];
-    dot += va * vb;
-    na += va * va;
-    nb += vb * vb;
-  }
-  if (!na || !nb) return 0;
-  return dot / (Math.sqrt(na) * Math.sqrt(nb));
-}
+import { cosineSimilarity } from '../utils.js';
 
 export async function generateRoleEmbeddings(role) {
   await SkillEmbedding.deleteMany({

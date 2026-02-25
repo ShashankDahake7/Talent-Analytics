@@ -64,7 +64,7 @@ def generate_synthetic_data(num_samples=1000):
     )
     
     # Add random noise (Reduced noise for clearer signal)
-    logit += np.random.normal(loc=0, scale=1.0, size=num_samples) 
+    logit += np.random.normal(loc=0, scale=0.6, size=num_samples) 
 
     # Shift bias to balance classes roughly 50/50 or 60/40
     logit += 9.0  

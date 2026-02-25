@@ -8,32 +8,20 @@ import os
 app = FastAPI(title="Talent Analytics ML Service", version="0.2.0")
 
 class EmployeeFeatures(BaseModel):
-    tenure_months: float = 12.0
-    performance_score: float = 3.0
-    engagement_score: float = 3.0
-    promotions: int = 0
-    salary_percentile: float = 50.0
-    leave_days_last_12_months: float = 0.0
-    overtime_hours_per_month: float = 0.0
-    months_since_last_promotion: float = 999.0
+    tenure_months: float
+    performance_score: float
+    engagement_score: float
+    promotions: int
+    salary_percentile: float
+    leave_days_last_12_months: float
+    overtime_hours_per_month: float
+    months_since_last_promotion: float
 
 class PredictRequest(BaseModel):
     employees: List[EmployeeFeatures]
 
 class PredictResponse(BaseModel):
     probabilities: List[float]
-
-def _feature_order():
-    return [
-        "tenure_months",
-        "performance_score",
-        "engagement_score",
-        "promotions",
-        "salary_percentile",
-        "leave_days_last_12_months",
-        "overtime_hours_per_month",
-        "months_since_last_promotion",
-    ]
 
 scaler = None
 
@@ -86,8 +74,7 @@ def health():
     return {"status": "ok", "service": "ml-attrition", "version": "0.2.0"}
 
 def _employee_to_row(e: EmployeeFeatures):
-    order = _feature_order()
-    return [getattr(e, k) for k in order]
+    return list(e.model_dump().values())
 
 @app.post("/predict/attrition", response_model=PredictResponse)
 def predict_attrition(req: PredictRequest):

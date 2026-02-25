@@ -7,24 +7,9 @@ import ManagerAssessment from '../models/ManagerAssessment.js';
 import SkillEmbedding from '../models/SkillEmbedding.js';
 import { generateContent, embedText } from './geminiClient.js';
 import { getAttritionProbabilityForEmployee } from './mlClient.js';
+import { MS_PER_MONTH, cosineSimilarity } from '../utils.js';
 
 const SKILL_MATCH_THRESHOLD = 0.75;
-
-function cosineSimilarity(a, b) {
-  if (!a || !b || a.length !== b.length || a.length === 0) return 0;
-  let dot = 0;
-  let na = 0;
-  let nb = 0;
-  for (let i = 0; i < a.length; i += 1) {
-    dot += a[i] * b[i];
-    na += a[i] * a[i];
-    nb += b[i] * b[i];
-  }
-  if (!na || !nb) return 0;
-  return dot / (Math.sqrt(na) * Math.sqrt(nb));
-}
-
-const MS_PER_MONTH = 1000 * 60 * 60 * 24 * 30;
 
 function monthsSince(date) {
   if (!date) return 999;
@@ -37,15 +22,18 @@ export async function getAttritionRiskForEmployee(employeeId) {
   if (!employee) {
     throw new Error('Employee not found');
   }
+  if (employee.status !== 'active') {
+    throw new Error(`Attrition risk is only calculated for active employees (status: ${employee.status})`);
+  }
   const tenureMonths = employee.dateOfJoining ? (Date.now() - employee.dateOfJoining.getTime()) / MS_PER_MONTH : 12;
   const monthsSinceLastPromotion = employee.lastPromotionDate ? monthsSince(employee.lastPromotionDate) : (employee.promotionsCount > 0 ? tenureMonths / (employee.promotionsCount + 1) : tenureMonths);
   const featureInput = {
     tenureMonths,
-    performanceScore: Math.max(3.2, employee.performanceRating ?? 3),
+    performanceScore: employee.performanceRating ?? 3,
     engagementScore: employee.engagementScore ?? 3,
     promotions: employee.promotionsCount ?? 0,
     salaryPercentile: employee.salaryPercentile ?? 50,
-    leaveDaysLast12Months: Math.min(10, employee.leaveDaysLast12Months ?? 0),
+    leaveDaysLast12Months: employee.leaveDaysLast12Months ?? 0,
     overtimeHoursPerMonth: employee.overtimeHoursPerMonth ?? 0,
     monthsSinceLastPromotion,
   };

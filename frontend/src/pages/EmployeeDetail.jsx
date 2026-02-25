@@ -38,6 +38,7 @@ export default function EmployeeDetail() {
 
   const canSeeFull = isHR || isManager;
   const isSelf = isEmployee && user?.employeeId === employeeId;
+  const isActive = employee?.status === 'active';
 
   useEffect(() => {
     setCareer(null);
@@ -287,7 +288,7 @@ export default function EmployeeDetail() {
             <Sparkles className="w-5 h-5" /> AI actions
           </h2>
           <div className="space-y-3">
-            {canSeeFull && (
+            {canSeeFull && isActive && (
               <div>
                 <button
                   onClick={runAttrition}
@@ -389,7 +390,7 @@ export default function EmployeeDetail() {
                 )}
               </div>
             )}
-            {canSeeFull && (
+            {canSeeFull && isActive && (
               <div>
                 <button
                   onClick={runHipo}
