@@ -314,15 +314,7 @@ export default function EmployeeDetail() {
               </div>
             )}
 
-            {canSeeFull && (
-              <button
-                onClick={() => navigate(`/managers/${employeeId}/assessment`)}
-                className="btn-secondary w-full justify-start"
-              >
-                <Users className="w-4 h-4" />
-                Manager Effectiveness
-              </button>
-            )}
+
             <div>
               <button
                 onClick={runCareer}

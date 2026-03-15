@@ -3,7 +3,6 @@ import JobRole from '../models/JobRole.js';
 import LearningItem from '../models/LearningItem.js';
 import Feedback from '../models/Feedback.js';
 import Prediction from '../models/Prediction.js';
-import ManagerAssessment from '../models/ManagerAssessment.js';
 import SkillEmbedding from '../models/SkillEmbedding.js';
 import { generateContent, embedText } from './geminiClient.js';
 import { getAttritionProbabilityForEmployee } from './mlClient.js';
@@ -242,66 +241,4 @@ export async function getSkillGaps(employeeId, targetRoleId) {
     targetRoleTitle: role.title,
     gaps,
   };
-}
-
-export async function assessManagerEffectiveness(managerId) {
-  const manager = await Employee.findOne({ employeeId: managerId });
-  if (!manager) throw new Error('Manager not found');
-  const directReports = await Employee.find({ managerId });
-  if (directReports.length === 0) {
-    throw new Error('This employee has no direct reports.');
-  }
-  const totalEmployees = directReports.length;
-  const avgPerformance = directReports.reduce((sum, e) => sum + (e.performanceRating || 3), 0) / totalEmployees;
-  const avgEngagement = directReports.reduce((sum, e) => sum + (e.engagementScore || 0), 0) / totalEmployees; // 0-100 scale
-  const retainedCount = directReports.filter((e) => !e.attritionRiskBand || e.attritionRiskBand === 'low').length;
-  const retentionRate = (retainedCount / totalEmployees) * 100;
-  const rawScore = (avgPerformance / 5) * 40 + (avgEngagement / 100) * 30 + (retentionRate / 100) * 30;
-  const overallScore = Math.min(100, Math.max(0, Math.round(rawScore)));
-  const systemPrompt = `You are an expert Leadership Coach and HR Analyst.
-  Analyze a manager's effectiveness based on their team's data.
-  Output strict JSON with this structure:
-  {
-    "factors": { "positive": ["string"], "negative": ["string"] },
-    "explanation": "string (2-3 sentences)",
-    "suggestedInterventions": [
-      { "action": "string", "predictedScore": number, "explanation": "string" }
-    ]
-  }
-  For "predictedScore", estimate the new score (current is ${overallScore}) if the action is taken.
-  Interventions should be "What-If" scenarios like "Send to Leadership Training", "Reduce Team Size", "Conduct Stay Interviews", etc.`;
-  const userInput = `Manager: ${manager.name} (${manager.departmentId})
-  Team Size: ${totalEmployees}
-  Average Performance: ${avgPerformance.toFixed(1)} / 5
-  Average Engagement: ${avgEngagement.toFixed(1)} / 100
-  Retention Rate: ${retentionRate.toFixed(1)}% ({retainedCount} low risk out of ${totalEmployees})
-  Analyze this manager's effectiveness.`;
-  let aiResult = {};
-  try {
-    const raw = await generateContent({ systemPrompt, userInput });
-    const jsonStr = raw.match(/\{[\s\S]*\}/)?.[0] || '{}';
-    aiResult = JSON.parse(jsonStr);
-  }
-  catch (err) {
-    console.error('Gemini manager assessment failed:', err);
-    aiResult = {
-      factors: { positive: [], negative: [] },
-      explanation: 'AI analysis unavailable.',
-      suggestedInterventions: [],
-    };
-  }
-  const assessment = await ManagerAssessment.create({
-    managerId,
-    overallScore,
-    metrics: {
-      teamSize: totalEmployees,
-      averagePerformance: avgPerformance,
-      retentionRate,
-      averageEngagement: avgEngagement,
-    },
-    factors: aiResult.factors || { positive: [], negative: [] },
-    aiAnalysis: aiResult.explanation || '',
-    suggestedInterventions: aiResult.suggestedInterventions || [],
-  });
-  return assessment;
 }

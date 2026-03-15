@@ -6,7 +6,6 @@ import employeeRoutes from './routes/employees.js';
 import analyticsRoutes from './routes/analytics.js';
 import aiRoutes from './routes/ai.js';
 import scenarioRoutes from './routes/scenario.js';
-import managerRoutes from './routes/managerRoutes.js';
 import jobRoleRoutes from './routes/jobRoles.js';
 import connectDB from './config/db.js';
 
@@ -27,7 +26,6 @@ app.use('/api/employees', employeeRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/scenario', scenarioRoutes);
-app.use('/api/managers', managerRoutes);
 app.use('/api/job-roles', jobRoleRoutes);
 
 app.listen(PORT, () => {

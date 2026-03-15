@@ -8,7 +8,6 @@ import EmployeeDetail from './pages/EmployeeDetail';
 import Analytics from './pages/Analytics';
 import AIInsights from './pages/AIInsights';
 import Scenario from './pages/Scenario';
-import ManagerAssessment from './pages/ManagerAssessment';
 
 function ProtectedRoute({ children, roles }) {
   const { isAuthenticated, user, loading } = useAuth();
@@ -35,7 +34,6 @@ export default function App() {
         <Route path="analytics" element={<ProtectedRoute roles={['HR_ADMIN']}><Analytics /></ProtectedRoute>} />
         <Route path="ai" element={<AIInsights />} />
         <Route path="scenario" element={<ProtectedRoute roles={['HR_ADMIN']}><Scenario /></ProtectedRoute>} />
-        <Route path="managers/:employeeId/assessment" element={<ManagerAssessment />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
