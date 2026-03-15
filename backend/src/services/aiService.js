@@ -118,7 +118,8 @@ export async function getCareerRecommendations(employeeId) {
   const raw = await generateContent({ systemPrompt, userInput });
   let parsed;
   let jsonStr = raw.trim();
-  const codeBlock = jsonStr.match(/```(?:json)?\s*([\s\S]*?)```/);
+  // Extracts content from Markdown code blocks: matches triple backticks, optional "json" tag, whitespace, and captures inner text.
+  const codeBlock = jsonStr.match(/```(?:json)?\s*([\s\S]*?)```/); 
   if (codeBlock) jsonStr = codeBlock[1].trim();
   try {
     parsed = JSON.parse(jsonStr);

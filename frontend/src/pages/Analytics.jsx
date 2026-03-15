@@ -10,8 +10,7 @@ import {
   LineChart,
   Line,
   Legend,
-  CartesianGrid,
-  Cell,
+  CartesianGrid
 } from 'recharts';
 import { api } from '../lib/api';
 

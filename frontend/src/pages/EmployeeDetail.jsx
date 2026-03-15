@@ -11,8 +11,7 @@ import {
   AlertTriangle,
   Sparkles,
   Target,
-  MessageSquare,
-  Users,
+  MessageSquare
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../lib/api';

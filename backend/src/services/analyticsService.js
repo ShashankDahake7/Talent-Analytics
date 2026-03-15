@@ -39,10 +39,13 @@ export const generateAttritionForecast = async (departmentId) => {
         }
         totalExpectedExitsNextYear += probability;
     }
+    // It adds up all individual probabilities. 
+    // If you have 10 people with a 10% risk each, that equals 1.0 expected exit per year.
     const monthlyExpectedExits = totalExpectedExitsNextYear / 12;
     const currentHeadcount = employees.length;
     const horizon = 6;
     const forecast = [];
+    // If you have 100 people and an exit rate of 2/month, the forecast will show m1: 98, m2: 96, m3: 94, ....
     let projectedHeadcount = currentHeadcount;
     for (let i = 1; i <= horizon; i += 1) {
         projectedHeadcount -= monthlyExpectedExits;

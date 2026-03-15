@@ -15,7 +15,7 @@ export default function Login() {
   if (isAuthenticated) return <Navigate to="/" replace />;
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    e.preventDefault(); // Prevent default browser refresh behavior
     setError('');
     setLoading(true);
     try {

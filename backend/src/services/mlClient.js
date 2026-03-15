@@ -1,10 +1,5 @@
 const ML_SERVICE_URL = process.env.ML_SERVICE_URL || 'http://localhost:8000';
 
-/**
- * Calls the ML service to predict attrition probability.
- * All fields in `employee` are expected to already have concrete values —
- * fallback defaults are applied upstream in aiService.js.
- */
 export async function getAttritionProbabilityForEmployee(employee) {
   const features = {
     tenure_months: employee.tenureMonths,

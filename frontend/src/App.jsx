@@ -30,6 +30,7 @@ export default function App() {
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
       <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
+        {/* The default page you see immediately after logging in at the / path. */}
         <Route index element={<Dashboard />} />
         <Route path="employees" element={<Employees />} />
         <Route path="employees/:employeeId" element={<EmployeeDetail />} />
@@ -37,6 +38,7 @@ export default function App() {
         <Route path="ai" element={<AIInsights />} />
         <Route path="scenario" element={<ProtectedRoute roles={['HR_ADMIN']}><Scenario /></ProtectedRoute>} />
       </Route>
+      {/* Matches any URL that doesn't exist (like /random-typo). */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

@@ -32,6 +32,7 @@ export default function AIInsights() {
     setSimilarLoading(true);
     setSimilarResult(null);
     try {
+      // encodeURIComponent to encode the query string ensuring the data is treated as plain text
       const res = await api.get(`/ai/skills/similar?q=${encodeURIComponent(similarQuery)}&topK=8`);
       setSimilarResult(res);
     } catch (e) {

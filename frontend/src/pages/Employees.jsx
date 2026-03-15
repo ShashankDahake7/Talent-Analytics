@@ -28,6 +28,7 @@ export default function Employees() {
       .finally(() => setLoading(false));
   }, [canList]);
 
+  // Extract unique departments from the employee list for filtering
   const departments = useMemo(
     () => [...new Set(list.map((e) => e.departmentId).filter(Boolean))].sort(),
     [list]

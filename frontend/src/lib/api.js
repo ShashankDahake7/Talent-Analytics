@@ -1,4 +1,4 @@
-const STORAGE_KEY = import.meta.env.VITE_AUTH_STORAGE_KEY ?? 'talent_analytics_auth';
+const STORAGE_KEY = import.meta.env.VITE_AUTH_STORAGE_KEY;
 const API_BASE = '/api';
 
 function getAuthHeaders() {

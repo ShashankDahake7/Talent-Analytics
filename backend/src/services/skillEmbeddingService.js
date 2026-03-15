@@ -86,7 +86,7 @@ async function validateQueryIsSkillRelated(query) {
     - Learning topics (e.g., "data analysis", "machine learning", "agile methodology")
     - Tools or technologies (e.g., "Figma", "Docker", "AWS")
     Invalid queries include:
-    - Personal names (e.g., "John", "Sarah", "shashank")
+    - Personal names (e.g., "John", "Sarah", "Shashank")
     - Random words or phrases unrelated to skills
     - Questions or sentences that aren't skill-focused
     Respond with ONLY "YES" if the query is skill/learning-related, or "NO" if it's not.`;
@@ -103,7 +103,7 @@ async function validateQueryIsSkillRelated(query) {
   }
 }
 
-export async function findSimilarSkills(query, topK = 10, minSimilarity = 0.4, maxScoreThreshold = 0.5) {
+export async function findSimilarSkills(query, topK = 10, minSimilarity = 0.5, maxScoreThreshold = 0.6) {
   const isValidQuery = await validateQueryIsSkillRelated(query);
   if (!isValidQuery) {
     return [];
@@ -120,8 +120,15 @@ export async function findSimilarSkills(query, topK = 10, minSimilarity = 0.4, m
       score: cosineSimilarity(queryVector, doc.vector),
     }))
     .filter((item) => item.score >= minSimilarity);
+
   scored.sort((a, b) => b.score - a.score);
+
+  if (scored.length > 0) {
+    console.log(`Search query: "${query}" | Best score: ${scored[0].score.toFixed(3)} | Threshold: ${maxScoreThreshold}`);
+  }
+
   if (scored.length === 0 || scored[0].score < maxScoreThreshold) {
+    console.log(`No highly relevant results found for "${query}" (best score below threshold).`);
     return [];
   }
   return scored.slice(0, topK);

@@ -13,9 +13,12 @@ import {
 } from '../services/skillEmbeddingService.js';
 import Employee from '../models/Employee.js';
 
+// user who is logged in can only see the data of their own team members
 async function assertEmployeeAccess(req, employeeId) {
     const { role, employeeId: requesterId } = req.user;
+    // can see anyone's data
     if (role === 'HR_ADMIN') return null;
+    // can only see their own profile
     if (role === 'EMPLOYEE') {
         return requesterId !== employeeId
             ? { status: 403, message: 'Forbidden: employees can only access their own data' }
@@ -116,7 +119,7 @@ export const getEmployeeSkillGaps = async (req, res) => {
     }
 };
 
-export const generateRoleEmbeddings = async (req, res) => {
+export const triggerBulkRoleEmbeddings = async (req, res) => {
     try {
         const result = await ensureRoleSkillEmbeddings();
         res.json(result);
@@ -128,7 +131,7 @@ export const generateRoleEmbeddings = async (req, res) => {
     }
 };
 
-export const generateLearningEmbeddings = async (req, res) => {
+export const triggerBulkLearningEmbeddings = async (req, res) => {
     try {
         const result = await ensureLearningItemEmbeddings();
         res.json(result);
