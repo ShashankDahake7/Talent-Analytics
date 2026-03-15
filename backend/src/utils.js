@@ -1,11 +1,5 @@
-// Milliseconds in one month (30-day approximation)
 export const MS_PER_MONTH = 1000 * 60 * 60 * 24 * 30;
 
-// Computes the cosine similarity between two numeric vectors.
-// Returns 0 if either vector is null/undefined, empty, or zero-magnitude.
-// @param {number[]} a
-// @param {number[]} b
-// @returns {number} value in [0, 1]
 export function cosineSimilarity(a, b) {
     if (!a || !b || a.length !== b.length || a.length === 0) return 0;
     let dot = 0;

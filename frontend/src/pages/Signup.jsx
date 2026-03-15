@@ -4,11 +4,12 @@ import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../lib/api';
 
-export default function Login() {
+export default function Signup() {
   const { login, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -17,13 +18,19 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+
+    if (password !== confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+
     setLoading(true);
     try {
-      const { token, user: userData } = await api.post('/auth/login', { email, password });
+      const { token, user: userData } = await api.post('/auth/signup', { email, password });
       login(userData, token);
       navigate('/', { replace: true });
     } catch (err) {
-      setError(err.data?.message || err.message || 'Login failed');
+      setError(err.data?.message || err.message || 'Signup failed');
     } finally {
       setLoading(false);
     }
@@ -39,7 +46,7 @@ export default function Login() {
       >
         <div className="text-center mb-10">
           <h1 className="font-serif text-4xl text-white">Talent Analytics</h1>
-          <p className="text-ink-400 mt-2">Sign in to your account</p>
+          <p className="text-ink-400 mt-2">Create a new account</p>
         </div>
         <form onSubmit={handleSubmit} className="card p-8 space-y-6">
           {error && (
@@ -70,16 +77,29 @@ export default function Login() {
               className="input bg-ink-900/50 border-ink-700 text-white placeholder-ink-500 focus:border-sage-500 focus:ring-sage-500"
               placeholder="••••••••"
               required
-              autoComplete="current-password"
+              autoComplete="new-password"
+            />
+          </div>
+          <div>
+            <label htmlFor="confirmPassword" className="label text-ink-200">Confirm password</label>
+            <input
+              id="confirmPassword"
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              className="input bg-ink-900/50 border-ink-700 text-white placeholder-ink-500 focus:border-sage-500 focus:ring-sage-500"
+              placeholder="••••••••"
+              required
+              autoComplete="new-password"
             />
           </div>
           <button type="submit" disabled={loading} className="btn-primary w-full py-3">
-            {loading ? 'Signing in…' : 'Sign in'}
+            {loading ? 'Creating account…' : 'Sign up'}
           </button>
           <p className="text-center text-sm text-ink-400">
-            Don&apos;t have an account?{' '}
-            <Link to="/signup" className="text-sage-300 hover:text-sage-200 underline-offset-4 hover:underline">
-              Sign up
+            Already have an account?{' '}
+            <Link to="/login" className="text-sage-300 hover:text-sage-200 underline-offset-4 hover:underline">
+              Sign in
             </Link>
           </p>
         </form>
@@ -87,3 +107,4 @@ export default function Login() {
     </div>
   );
 }
+
