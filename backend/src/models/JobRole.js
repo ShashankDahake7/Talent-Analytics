@@ -6,7 +6,6 @@ const JobRoleSchema = new mongoose.Schema(
     title: { type: String, required: true },
     jobFamily: { type: String },
     level: { type: String },
-    description: { type: String },
     requiredSkills: [
       {
         name: { type: String, required: true },
@@ -17,14 +16,6 @@ const JobRoleSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-JobRoleSchema.post('save', async function (doc) {
-  try {
-    const { generateRoleEmbeddings } = await import('../services/skillEmbeddingService.js');
-    await generateRoleEmbeddings(doc);
-  }
-  catch (err) {
-    console.error(`Error generating embeddings for role ${doc.roleId}:`, err);
-  }
-});
+
 
 export default mongoose.model('JobRole', JobRoleSchema);

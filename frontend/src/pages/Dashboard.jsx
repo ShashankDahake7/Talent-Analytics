@@ -124,12 +124,8 @@ export default function Dashboard() {
               View employees <ArrowRight className="w-4 h-4" />
             </Link>
           )}
-          <Link
-            to="/ai"
-            className="inline-flex items-center gap-2 rounded-xl bg-ink-100 text-ink-800 px-4 py-3 text-sm font-medium hover:bg-ink-200 transition-colors"
-          >
-            AI Insights <ArrowRight className="w-4 h-4" />
-          </Link>
+
+
           {isHR && (
             <>
               <Link

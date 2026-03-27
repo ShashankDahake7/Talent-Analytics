@@ -11,7 +11,6 @@ import {
   AlertTriangle,
   Sparkles,
   Target,
-  MessageSquare
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../lib/api';
@@ -24,16 +23,13 @@ export default function EmployeeDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [career, setCareer] = useState(null);
-  const [feedbackSummary, setFeedbackSummary] = useState(null);
+
   const [hipo, setHipo] = useState(null);
-  const [skillGaps, setSkillGaps] = useState(null);
-  const [roles, setRoles] = useState([]);
-  const [selectedRoleId, setSelectedRoleId] = useState('');
   const [loadingAI, setLoadingAI] = useState({});
   const [attritionResult, setAttritionResult] = useState(null);
   const [attritionError, setAttritionError] = useState('');
   const [careerError, setCareerError] = useState('');
-  const [feedbackError, setFeedbackError] = useState('');
+
 
   const canSeeFull = isHR || isManager;
   const isSelf = isEmployee && user?.employeeId === employeeId;
@@ -41,13 +37,11 @@ export default function EmployeeDetail() {
 
   useEffect(() => {
     setCareer(null);
-    setFeedbackSummary(null);
     setHipo(null);
-    setSkillGaps(null);
     setAttritionResult(null);
     setAttritionError('');
     setCareerError('');
-    setFeedbackError('');
+
   }, [employeeId]);
 
   useEffect(() => {
@@ -55,7 +49,6 @@ export default function EmployeeDetail() {
       .get(`/employees/${employeeId}`)
       .then((e) => {
         setEmployee(e);
-        if (e?.roleId) setSelectedRoleId(e.roleId);
       })
       .catch((e) => {
         setError(e.message);
@@ -64,9 +57,7 @@ export default function EmployeeDetail() {
       .finally(() => setLoading(false));
   }, [employeeId, navigate]);
 
-  useEffect(() => {
-    api.get('/job-roles').then(setRoles).catch(() => setRoles([]));
-  }, []);
+
 
   const runAttrition = () => {
     if (!canSeeFull) return;
@@ -92,16 +83,7 @@ export default function EmployeeDetail() {
       .finally(() => setLoadingAI((p) => ({ ...p, career: false })));
   };
 
-  const runFeedback = () => {
-    if (!canSeeFull) return;
-    setFeedbackError('');
-    setLoadingAI((p) => ({ ...p, feedback: true }));
-    api
-      .get(`/ai/feedback/summary/${employeeId}`)
-      .then(setFeedbackSummary)
-      .catch((e) => setFeedbackError(e.message || 'Failed to load feedback summary.'))
-      .finally(() => setLoadingAI((p) => ({ ...p, feedback: false })));
-  };
+
 
   const runHipo = () => {
     if (!canSeeFull) return;
@@ -113,15 +95,7 @@ export default function EmployeeDetail() {
       .finally(() => setLoadingAI((p) => ({ ...p, hipo: false })));
   };
 
-  const runSkillGaps = () => {
-    if (!selectedRoleId) return;
-    setLoadingAI((p) => ({ ...p, gaps: true }));
-    api
-      .get(`/ai/skills/gaps/${employeeId}?roleId=${encodeURIComponent(selectedRoleId)}`)
-      .then(setSkillGaps)
-      .catch(() => { })
-      .finally(() => setLoadingAI((p) => ({ ...p, gaps: false })));
-  };
+
 
   if (loading || !employee) {
     return (
@@ -359,28 +333,7 @@ export default function EmployeeDetail() {
                 </div>
               )}
             </div>
-            {canSeeFull && (
-              <div>
-                <button
-                  onClick={runFeedback}
-                  disabled={!!loadingAI.feedback}
-                  className="btn-secondary w-full justify-start"
-                >
-                  <MessageSquare className="w-4 h-4" />
-                  {loadingAI.feedback ? 'Loading…' : 'Feedback summary'}
-                </button>
-                {feedbackError && (
-                  <div className="mt-2 rounded-xl bg-amber-50 border border-amber-200 p-3 text-sm text-amber-800">
-                    {feedbackError}
-                  </div>
-                )}
-                {feedbackSummary && !feedbackError && (
-                  <div className="mt-2 rounded-xl bg-ink-50 p-3 text-sm text-ink-700">
-                    {feedbackSummary.summary || feedbackSummary.message || 'No summary.'}
-                  </div>
-                )}
-              </div>
-            )}
+
             {canSeeFull && isActive && (
               <div>
                 <button
@@ -403,48 +356,7 @@ export default function EmployeeDetail() {
                 )}
               </div>
             )}
-            <div>
-              <div className="flex gap-2 mb-2">
-                <select
-                  value={selectedRoleId}
-                  onChange={(e) => setSelectedRoleId(e.target.value)}
-                  className="input flex-1 py-2 text-sm"
-                >
-                  <option value="">Select target role</option>
-                  {roles.filter((r) => r.roleId !== employee?.roleId).map((r) => (
-                    <option key={r.roleId} value={r.roleId}>
-                      {r.title} ({r.roleId})
-                    </option>
-                  ))}
-                </select>
-                <button
-                  onClick={runSkillGaps}
-                  disabled={!selectedRoleId || !!loadingAI.gaps}
-                  className="btn-secondary shrink-0"
-                >
-                  {loadingAI.gaps ? '…' : 'Gaps'}
-                </button>
-              </div>
-              {skillGaps && (
-                <div className="mt-2 rounded-xl bg-ink-50 p-3 text-sm">
-                  <p className="font-medium text-ink-900 mb-2">vs {skillGaps.targetRoleTitle || skillGaps.targetRoleId}</p>
-                  {skillGaps.gaps?.length > 0 ? (
-                    <ul className="space-y-1.5 text-ink-700">
-                      {skillGaps.gaps.filter((g) => g.gap > 0).map((g, i) => (
-                        <li key={i}>
-                          {g.skill}: L{g.currentLevel} → L{g.requiredLevel} (gap {g.gap})
-                        </li>
-                      ))}
-                      {skillGaps.gaps.every((g) => g.gap === 0) && (
-                        <li className="text-sage-700">No gaps — meets requirements.</li>
-                      )}
-                    </ul>
-                  ) : (
-                    <p className="text-ink-600">No significant gaps vs target role.</p>
-                  )}
-                </div>
-              )}
-            </div>
+
           </div>
         </motion.div>
       </div>

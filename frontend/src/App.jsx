@@ -7,7 +7,7 @@ import Dashboard from './pages/Dashboard';
 import Employees from './pages/Employees';
 import EmployeeDetail from './pages/EmployeeDetail';
 import Analytics from './pages/Analytics';
-import AIInsights from './pages/AIInsights';
+
 import Scenario from './pages/Scenario';
 
 function ProtectedRoute({ children, roles }) {
@@ -35,7 +35,7 @@ export default function App() {
         <Route path="employees" element={<Employees />} />
         <Route path="employees/:employeeId" element={<EmployeeDetail />} />
         <Route path="analytics" element={<ProtectedRoute roles={['HR_ADMIN']}><Analytics /></ProtectedRoute>} />
-        <Route path="ai" element={<AIInsights />} />
+
         <Route path="scenario" element={<ProtectedRoute roles={['HR_ADMIN']}><Scenario /></ProtectedRoute>} />
       </Route>
       {/* Matches any URL that doesn't exist (like /random-typo). */}

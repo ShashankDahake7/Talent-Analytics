@@ -1,14 +1,11 @@
 import Employee from '../models/Employee.js';
 import JobRole from '../models/JobRole.js';
 import LearningItem from '../models/LearningItem.js';
-import Feedback from '../models/Feedback.js';
-import Prediction from '../models/Prediction.js';
-import SkillEmbedding from '../models/SkillEmbedding.js';
-import { generateContent, embedText } from './geminiClient.js';
-import { getAttritionProbabilityForEmployee } from './mlClient.js';
-import { MS_PER_MONTH, cosineSimilarity } from '../utils.js';
 
-const SKILL_MATCH_THRESHOLD = 0.75;
+import Prediction from '../models/Prediction.js';
+import { generateContent } from './geminiClient.js';
+import { getAttritionProbabilityForEmployee } from './mlClient.js';
+import { MS_PER_MONTH } from '../utils.js';
 
 function monthsSince(date) {
   if (!date) return 999;
@@ -119,7 +116,7 @@ export async function getCareerRecommendations(employeeId) {
   let parsed;
   let jsonStr = raw.trim();
   // Extracts content from Markdown code blocks: matches triple backticks, optional "json" tag, whitespace, and captures inner text.
-  const codeBlock = jsonStr.match(/```(?:json)?\s*([\s\S]*?)```/); 
+  const codeBlock = jsonStr.match(/```(?:json)?\s*([\s\S]*?)```/);
   if (codeBlock) jsonStr = codeBlock[1].trim();
   try {
     parsed = JSON.parse(jsonStr);
@@ -132,31 +129,7 @@ export async function getCareerRecommendations(employeeId) {
   return parsed;
 }
 
-export async function analyzeFeedbackText(text) {
-  const systemPrompt = 'You are analyzing employee feedback for HR. Return JSON: { sentimentScore: number between -1 and 1, topics: string[] }.';
-  const userInput = `Feedback text:\n${text}\n\nAnalyze the sentiment and main themes.`;
-  const raw = await generateContent({ systemPrompt, userInput });
-  try {
-    return JSON.parse(raw);
-  }
-  catch {
-    return { rawText: raw };
-  }
-}
 
-export async function summarizeTeamFeedback(employeeId) {
-  const feedback = await Feedback.find({ employeeId }).sort({ createdAt: 1 });
-  if (!feedback || feedback.length === 0) {
-    return { summary: 'No feedback on file for this employee.' };
-  }
-  const systemPrompt = 'You summarize feedback for HR. Return 2-3 bullet points of main themes and overall sentiment. Use only the feedback items provided.';
-  const itemsText = feedback
-    .map((f, i) => `${i + 1}. [${f.source || 'other'}]: ${f.text}`)
-    .join('\n');
-  const userInput = `Feedback items for this employee:\n\n${itemsText}\n\nSummarize into 2-3 bullet points (main themes and overall sentiment).`;
-  const summary = await generateContent({ systemPrompt, userInput });
-  return { summary };
-}
 
 export async function evaluateHighPotential(employeeId) {
   const employee = await Employee.findOne({ employeeId });
@@ -175,71 +148,5 @@ export async function evaluateHighPotential(employeeId) {
     performanceRating: perf,
     potentialRating: pot,
     tenureMonths,
-  };
-}
-
-export async function getSkillGaps(employeeId, targetRoleId) {
-  const employee = await Employee.findOne({ employeeId });
-  if (!employee) {
-    throw new Error('Employee not found');
-  }
-  const role = await JobRole.findOne({ roleId: targetRoleId });
-  if (!role) {
-    throw new Error('Job role not found');
-  }
-
-  const gaps = await Promise.all(
-    (role.requiredSkills || []).map(async (req) => {
-      const reqEmbedding = await SkillEmbedding.findOne({
-        type: 'role_skill',
-        'meta.roleId': role.roleId,
-        'meta.skillName': req.name,
-      });
-
-      let bestMatch = { level: 0, matchedSkill: null, similarity: 0 };
-
-      if (reqEmbedding) {
-        for (const empSkill of employee.skills || []) {
-          try {
-            const empVector = await embedText(empSkill.name);
-            const sim = cosineSimilarity(empVector, reqEmbedding.vector);
-            if (sim >= SKILL_MATCH_THRESHOLD && sim > bestMatch.similarity) {
-              bestMatch = {
-                level: empSkill.level || 0,
-                matchedSkill: empSkill.name,
-                similarity: parseFloat(sim.toFixed(3)),
-              };
-            }
-          } catch (err) {
-            console.error(`Embedding failed for skill "${empSkill.name}":`, err.message);
-          }
-        }
-      } else {
-        const key = req.name.toLowerCase();
-        const found = (employee.skills || []).find(
-          (s) => s.name.toLowerCase() === key
-        );
-        if (found) {
-          bestMatch = { level: found.level || 0, matchedSkill: found.name, similarity: 1 };
-        }
-      }
-
-      const gap = Math.max(0, (req.minLevel || 0) - bestMatch.level);
-      return {
-        skill: req.name,
-        requiredLevel: req.minLevel,
-        currentLevel: bestMatch.level,
-        matchedSkill: bestMatch.matchedSkill,
-        similarity: bestMatch.similarity || null,
-        gap,
-      };
-    })
-  );
-
-  return {
-    employeeId,
-    targetRoleId: role.roleId,
-    targetRoleTitle: role.title,
-    gaps,
   };
 }

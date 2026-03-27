@@ -1,6 +1,6 @@
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { LayoutDashboard, Users, BarChart3, Sparkles, GitBranch, LogOut } from 'lucide-react';
+import { LayoutDashboard, Users, BarChart3, GitBranch, LogOut } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 function buildNav(isHR, isEmployee, employeeId) {
@@ -10,7 +10,7 @@ function buildNav(isHR, isEmployee, employeeId) {
       ? { to: `/employees/${employeeId}`, label: 'My profile', icon: Users }
       : { to: '/employees', label: 'Employees', icon: Users },
     { to: '/analytics', label: 'Analytics', icon: BarChart3, hrOnly: true },
-    { to: '/ai', label: 'AI Insights', icon: Sparkles },
+
     { to: '/scenario', label: 'Scenario', icon: GitBranch, hrOnly: true },
   ];
   return base.filter(Boolean);

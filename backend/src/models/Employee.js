@@ -32,8 +32,6 @@ const EmployeeSchema = new mongoose.Schema(
     leaveDaysLast12Months: { type: Number, min: 0, default: 0 },
     overtimeHoursPerMonth: { type: Number, min: 0, default: 0 },
     lastPromotionDate: { type: Date },
-    careerLevel: { type: String },
-    currentJobFamily: { type: String },
     location: { type: String },
     attritionRiskScore: { type: Number, min: 0, max: 1 },
     attritionRiskBand: { type: String, enum: ['low', 'medium', 'high', null], default: null },
