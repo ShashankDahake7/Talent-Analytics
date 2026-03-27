@@ -30,7 +30,7 @@ export const runAttritionScenario = async (req, res) => {
                 `- ${e.name}`,
                 `  Department: ${e.departmentId || 'N/A'}, Role: ${e.roleId || 'N/A'}`,
                 `  Performance: ${e.performanceRating ?? 'N/A'}/5, Engagement: ${e.engagementScore ?? 'N/A'}/5`,
-                `  Attrition risk: ${e.attritionRiskBand ?? 'not assessed'} (score: ${e.attritionRiskScore != null ? (e.attritionRiskScore * 100).toFixed(0) + '%' : 'N/A'})`,
+                `  Attrition risk: ${e.attritionRiskBand ?? 'not assessed'} (score: ${e.attritionRiskScore != null ? (e.attritionRiskScore * 100).toFixed(1) + '%' : 'N/A'})`,
                 `  Tenure: ${tenureMonths != null ? tenureMonths + ' months' : 'N/A'}`,
                 `  High potential: ${e.highPotentialFlag ? 'Yes' : 'No'}`,
                 `  Skills: ${skills}`,

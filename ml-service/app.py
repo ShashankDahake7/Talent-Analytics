@@ -28,27 +28,7 @@ scaler = None
 def _init_model():
     """Load trained model and scaler, or fallback to rule-based model."""
     global scaler    
-    class FallbackModel:
-        def predict_proba(self, X):
-            probs = []
-            for row in X:
-                (
-                    tenure, perf, engagement, promotions, salary,
-                    leave, overtime, months_since_promo,
-                ) = row
-                p = 0.5
-                p -= tenure / 200
-                p += (3.0 - perf) * 0.08
-                p += (3.0 - engagement) * 0.06
-                p -= promotions * 0.06
-                p -= (salary - 50) / 500
-                p += (leave - 10) / 80
-                p += (overtime - 8) / 100
-                p += min(months_since_promo, 60) / 600
-                p = max(0.05, min(0.95, p))
-                probs.append([1 - p, p])
-            return np.array(probs)
-
+    
     try:
         model = None
         if os.path.exists("model.pkl"):
@@ -61,11 +41,9 @@ def _init_model():
         else:
             print("Model or scaler not found. Using fallback.")
             scaler = None
-            return FallbackModel()
     except Exception as e:
         print(f"Error loading model: {e}. Using fallback.")
         scaler = None
-        return FallbackModel()
 
 model = _init_model()
 

@@ -53,8 +53,6 @@ export const getCareerRecs = async (req, res) => {
     }
 };
 
-
-
 export const evaluateHiPo = async (req, res) => {
     try {
         const { employeeId } = req.params;
@@ -67,5 +65,3 @@ export const evaluateHiPo = async (req, res) => {
         res.status(500).json({ message: err.message || 'Error evaluating high potential' });
     }
 };
-
-

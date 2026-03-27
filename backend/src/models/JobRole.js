@@ -16,6 +16,4 @@ const JobRoleSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-
-
 export default mongoose.model('JobRole', JobRoleSchema);

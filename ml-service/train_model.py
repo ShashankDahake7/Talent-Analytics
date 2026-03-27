@@ -45,7 +45,7 @@ def train_and_save_model():
     X_test_scaled = scaler.transform(X_test.values)
 
     print("Training Logistic Regression model...")
-    model = LogisticRegression(random_state=42)
+    model = LogisticRegression(random_state=42, C=0.01, max_iter=1000)
     model.fit(X_train_scaled, y_train)
 
     print("Evaluating model...")

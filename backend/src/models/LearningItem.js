@@ -13,6 +13,4 @@ const LearningItemSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-
-
 export default mongoose.model('LearningItem', LearningItemSchema);

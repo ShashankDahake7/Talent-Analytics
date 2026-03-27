@@ -14,4 +14,3 @@ const PredictionSchema = new mongoose.Schema(
 );
 
 export default mongoose.model('Prediction', PredictionSchema);
-

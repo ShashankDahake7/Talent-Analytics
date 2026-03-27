@@ -7,7 +7,7 @@ export const getEmployees = async (req, res) => {
         if (departmentId) query.departmentId = departmentId;
         if (managerId) query.managerId = managerId;
         if (status) query.status = status;
-        const employees = await Employee.find(query).limit(200);
+        const employees = await Employee.find(query);
         res.json(employees);
     } catch (err) {
         console.error(err);

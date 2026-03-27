@@ -23,14 +23,11 @@ export default function EmployeeDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [career, setCareer] = useState(null);
-
   const [hipo, setHipo] = useState(null);
   const [loadingAI, setLoadingAI] = useState({});
   const [attritionResult, setAttritionResult] = useState(null);
   const [attritionError, setAttritionError] = useState('');
   const [careerError, setCareerError] = useState('');
-
-
   const canSeeFull = isHR || isManager;
   const isSelf = isEmployee && user?.employeeId === employeeId;
   const isActive = employee?.status === 'active';
@@ -41,7 +38,6 @@ export default function EmployeeDetail() {
     setAttritionResult(null);
     setAttritionError('');
     setCareerError('');
-
   }, [employeeId]);
 
   useEffect(() => {
@@ -56,8 +52,6 @@ export default function EmployeeDetail() {
       })
       .finally(() => setLoading(false));
   }, [employeeId, navigate]);
-
-
 
   const runAttrition = () => {
     if (!canSeeFull) return;
@@ -83,8 +77,6 @@ export default function EmployeeDetail() {
       .finally(() => setLoadingAI((p) => ({ ...p, career: false })));
   };
 
-
-
   const runHipo = () => {
     if (!canSeeFull) return;
     setLoadingAI((p) => ({ ...p, hipo: true }));
@@ -94,8 +86,6 @@ export default function EmployeeDetail() {
       .catch(() => { })
       .finally(() => setLoadingAI((p) => ({ ...p, hipo: false })));
   };
-
-
 
   if (loading || !employee) {
     return (
@@ -279,7 +269,7 @@ export default function EmployeeDetail() {
                 {attritionResult && (
                   <div className="mt-2 rounded-xl bg-ink-50 p-3 text-sm">
                     <p className="font-medium text-ink-900">
-                      Score: {(attritionResult.score * 100).toFixed(0)}% · {attritionResult.band}
+                      Score: {(attritionResult.score * 100).toFixed(1)}% · {attritionResult.band}
                     </p>
                     <p className="text-ink-600 mt-1">{attritionResult.explanation}</p>
                   </div>

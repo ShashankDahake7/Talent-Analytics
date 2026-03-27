@@ -60,15 +60,15 @@ Salary percentile: ${employee.salaryPercentile ?? 'N/A'}
 Leave days (last 12 months): ${employee.leaveDaysLast12Months ?? 0}
 Overtime (hours/month): ${employee.overtimeHoursPerMonth ?? 0}
 Months since last promotion: ${monthsSinceLastPromotion === 999 ? 'never' : monthsSinceLastPromotion.toFixed(0)}
-ML attrition risk score (0-1): ${score.toFixed(2)} (band: ${band}).
-Explain in plain language why this employee might be at this risk level. Use only the facts above.`;
+ML attrition risk score (0-1): ${score.toFixed(3)} (band: ${band}).
+Explain in plain language why this employee might be at this risk level. Use only the facts above. In your explanation, include the specific risk score from the prompt (e.g., "score 0.91") rather than rounding it.`;
   let explanation = '';
   try {
     explanation = await generateContent({ systemPrompt, userInput });
   }
   catch (err) {
     console.error('Gemini explanation failed:', err.message);
-    explanation = `Risk band: ${band}. Score: ${(score * 100).toFixed(0)}%. Based on tenure, performance, engagement, promotions, salary, leave frequency, overtime, and time since last promotion.`;
+    explanation = `Risk band: ${band}. Score: ${(score * 100).toFixed(1)}%. Based on tenure, performance, engagement, promotions, salary, leave frequency, overtime, and time since last promotion.`;
   }
   await Prediction.create({
     employeeId,
@@ -128,8 +128,6 @@ export async function getCareerRecommendations(employeeId) {
   if (parsed && !Array.isArray(parsed.learning)) parsed.learning = parsed.learning || [];
   return parsed;
 }
-
-
 
 export async function evaluateHighPotential(employeeId) {
   const employee = await Employee.findOne({ employeeId });

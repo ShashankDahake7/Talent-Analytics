@@ -6,8 +6,6 @@ const router = express.Router();
 
 router.post('/attrition/:employeeId', authenticate, requireRole(['HR_ADMIN', 'MANAGER']), aiController.getAttritionRisk);
 router.get('/career/:employeeId', authenticate, requireRole(['HR_ADMIN', 'MANAGER', 'EMPLOYEE']), aiController.getCareerRecs);
-
 router.post('/hipo/:employeeId', authenticate, requireRole(['HR_ADMIN', 'MANAGER']), aiController.evaluateHiPo);
-
 
 export default router;
